@@ -1,78 +1,142 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { PoemLogo } from "@/components/brand/poem-logo";
 
 const navigation = [
-  { label: "About", href: "/about" },
-  { label: "Programs", href: "/programs" },
-  { label: "Projects", href: "/projects" },
-  { label: "Impact", href: "/impact" },
-  { label: "Resources", href: "/resources" },
-  { label: "News", href: "/news" },
+  { href: "/about", label: "About" },
+  { href: "/programs", label: "Programs" },
+  { href: "/projects", label: "Projects" },
+  { href: "/impact", label: "Impact" },
+  { href: "/resources", label: "Resources" },
+  { href: "/stories", label: "Stories" },
+  { href: "/news", label: "News" },
+  { href: "/contact", label: "Contact" },
 ];
 
+function navLinkClasses(active: boolean) {
+  return active
+    ? "text-poem-950"
+    : "text-poem-muted hover:text-poem-900";
+}
+
 export function SiteHeader() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   return (
-    <>
-      <div className="bg-poem-950 text-white">
-        <div className="container-poem flex min-h-9 items-center justify-between gap-4 py-2 text-xs font-medium">
-          <p className="text-white/70">Participatory Organization for Empowering Marginalized</p>
-          <p className="hidden text-poem-lime sm:block">Mirpurkhas, Sindh, Pakistan</p>
+    <header className="sticky top-0 z-50 border-b border-black/5 bg-white/90 backdrop-blur">
+      <div className="container-poem flex h-20 items-center justify-between gap-4">
+        <div className="flex items-center gap-6">
+          <PoemLogo
+            href="/"
+            variant="horizontal"
+            size="md"
+            priority
+            imageClassName="max-h-12 w-auto object-contain"
+          />
         </div>
-      </div>
 
-      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/90 backdrop-blur-xl">
-        <div className="container-poem flex h-[82px] items-center justify-between">
-          <Link href="/" className="group flex items-center gap-3">
-            <div className="grid size-11 place-items-center rounded-2xl bg-poem-900 text-lg font-black text-white shadow-lg shadow-poem-900/15 transition group-hover:-rotate-3">P</div>
-            <div>
-              <div className="text-xl font-extrabold tracking-[-0.04em] text-poem-950">POEM</div>
-              <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-poem-muted">Pakistan</div>
-            </div>
-          </Link>
+        <nav className="hidden items-center gap-7 lg:flex">
+          {navigation.map((item) => {
+            const active =
+              pathname === item.href ||
+              (item.href !== "/" && pathname.startsWith(`${item.href}/`));
 
-          <nav className="hidden items-center gap-7 lg:flex">
-            {navigation.map((item) => (
-              <Link key={item.label} href={item.href} className="text-sm font-semibold text-poem-ink transition hover:text-poem-700">
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`text-sm font-bold transition ${navLinkClasses(active)}`}
+              >
                 {item.label}
               </Link>
-            ))}
-          </nav>
+            );
+          })}
 
-          <div className="hidden items-center gap-2 lg:flex">
-            <Link href="/contact" className="rounded-full px-4 py-3 text-sm font-bold text-poem-900 transition hover:bg-poem-soft">Contact</Link>
-            <Link href="/donate" className="inline-flex items-center gap-2 rounded-full bg-poem-900 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-poem-900/15 transition hover:-translate-y-0.5 hover:bg-poem-800">
-              Donate <ArrowUpRight size={16} />
-            </Link>
-          </div>
+          <Link
+            href="/donate"
+            className="rounded-full bg-poem-950 px-5 py-3 text-sm font-extrabold text-white transition hover:translate-y-[-1px]"
+          >
+            Donate
+          </Link>
+        </nav>
 
-          <button type="button" onClick={() => setOpen(!open)} className="grid size-11 place-items-center rounded-xl border border-black/10 lg:hidden" aria-label="Toggle navigation" aria-expanded={open}>
-            {open ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
+        <button
+          type="button"
+          className="grid size-11 place-items-center rounded-xl border border-black/10 lg:hidden"
+          aria-label="Open navigation"
+          onClick={() => setOpen(true)}
+        >
+          <Menu size={20} />
+        </button>
+      </div>
 
-        {open ? (
-          <div className="border-t border-black/5 bg-white lg:hidden">
-            <nav className="container-poem flex flex-col py-5">
-              {navigation.map((item) => (
-                <Link key={item.label} href={item.href} onClick={() => setOpen(false)} className="border-b border-black/5 py-4 text-base font-semibold text-poem-ink">
-                  {item.label}
-                </Link>
-              ))}
-              <Link href="/partners" onClick={() => setOpen(false)} className="border-b border-black/5 py-4 text-base font-semibold text-poem-ink">Partners</Link>
-              <Link href="/about/team" onClick={() => setOpen(false)} className="border-b border-black/5 py-4 text-base font-semibold text-poem-ink">Team</Link>
-              <Link href="/careers" onClick={() => setOpen(false)} className="border-b border-black/5 py-4 text-base font-semibold text-poem-ink">Careers</Link>
-              <Link href="/tenders" onClick={() => setOpen(false)} className="border-b border-black/5 py-4 text-base font-semibold text-poem-ink">Tenders</Link>
-              <Link href="/contact" onClick={() => setOpen(false)} className="border-b border-black/5 py-4 text-base font-semibold text-poem-ink">Contact</Link>
-              <Link href="/donate" onClick={() => setOpen(false)} className="mt-5 rounded-xl bg-poem-900 px-5 py-4 text-center font-bold text-white">Donate to POEM</Link>
+      {open ? (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/45"
+            aria-label="Close navigation overlay"
+            onClick={() => setOpen(false)}
+          />
+
+          <div className="relative ml-auto flex h-full w-[min(88vw,360px)] flex-col bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-black/5 px-5 py-4">
+              <PoemLogo
+                href="/"
+                variant="horizontal"
+                size="sm"
+                imageClassName="max-h-10 w-auto object-contain"
+              />
+              <button
+                type="button"
+                className="grid size-10 place-items-center rounded-xl border border-black/10"
+                aria-label="Close navigation"
+                onClick={() => setOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <nav className="flex flex-1 flex-col gap-1 px-4 py-5">
+              {navigation.map((item) => {
+                const active =
+                  pathname === item.href ||
+                  (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className={`rounded-xl px-4 py-3 text-sm font-bold transition ${
+                      active
+                        ? "bg-poem-soft text-poem-950"
+                        : "text-poem-muted hover:bg-poem-soft/60 hover:text-poem-900"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
             </nav>
+
+            <div className="border-t border-black/5 p-4">
+              <Link
+                href="/donate"
+                onClick={() => setOpen(false)}
+                className="block rounded-full bg-poem-950 px-5 py-3 text-center text-sm font-extrabold text-white"
+              >
+                Donate
+              </Link>
+            </div>
           </div>
-        ) : null}
-      </header>
-    </>
+        </div>
+      ) : null}
+    </header>
   );
 }

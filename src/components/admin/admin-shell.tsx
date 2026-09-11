@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { logout } from "@/app/admin/actions";
+import { PoemLogo } from "@/components/brand/poem-logo";
 
 type NavItem = {
   label: string;
@@ -35,84 +36,21 @@ type NavItem = {
 
 const navigation: NavItem[] = [
   { label: "Dashboard", href: "/admin", icon: Home },
-  {
-    label: "Projects",
-    href: "/admin/projects",
-    icon: FolderKanban,
-  },
-  {
-    label: "Programs",
-    href: "/admin/programs",
-    icon: BriefcaseBusiness,
-  },
-  {
-    label: "Impact",
-    href: "/admin/impact",
-    icon: BarChart3,
-  },
-  {
-    label: "Resources",
-    href: "/admin/resources",
-    icon: FileText,
-  },
-  {
-    label: "Stories",
-    href: "/admin/stories",
-    icon: BookOpenText,
-  },
-  {
-    label: "News",
-    href: "/admin/news",
-    icon: Newspaper,
-  },
-  {
-    label: "Partners",
-    href: "/admin/partners",
-    icon: Building2,
-  },
-  {
-    label: "Team",
-    href: "/admin/team",
-    icon: UsersRound,
-  },
-  {
-    label: "Careers",
-    href: "/admin/careers",
-    icon: BriefcaseBusiness,
-  },
-  {
-    label: "Tenders",
-    href: "/admin/tenders",
-    icon: ClipboardList,
-  },
-  {
-    label: "Media",
-    href: "/admin/media",
-    icon: Images,
-  },
-  {
-    label: "Messages",
-    href: "/admin/messages",
-    icon: MessageSquare,
-  },
-  {
-    label: "Audit Log",
-    href: "/admin/audit",
-    icon: Activity,
-    adminOnly: true,
-  },
-  {
-    label: "Users & Access",
-    href: "/admin/users",
-    icon: ShieldCheck,
-    superAdminOnly: true,
-  },
-  {
-    label: "Site Settings",
-    href: "/admin/settings",
-    icon: Settings,
-    adminOnly: true,
-  },
+  { label: "Projects", href: "/admin/projects", icon: FolderKanban },
+  { label: "Programs", href: "/admin/programs", icon: BriefcaseBusiness },
+  { label: "Impact", href: "/admin/impact", icon: BarChart3 },
+  { label: "Resources", href: "/admin/resources", icon: FileText },
+  { label: "Stories", href: "/admin/stories", icon: BookOpenText },
+  { label: "News", href: "/admin/news", icon: Newspaper },
+  { label: "Partners", href: "/admin/partners", icon: Building2 },
+  { label: "Team", href: "/admin/team", icon: UsersRound },
+  { label: "Careers", href: "/admin/careers", icon: BriefcaseBusiness },
+  { label: "Tenders", href: "/admin/tenders", icon: ClipboardList },
+  { label: "Media", href: "/admin/media", icon: Images },
+  { label: "Messages", href: "/admin/messages", icon: MessageSquare },
+  { label: "Audit Log", href: "/admin/audit", icon: Activity, adminOnly: true },
+  { label: "Users & Access", href: "/admin/users", icon: ShieldCheck, superAdminOnly: true },
+  { label: "Site Settings", href: "/admin/settings", icon: Settings, adminOnly: true },
 ];
 
 function Sidebar({
@@ -132,10 +70,7 @@ function Sidebar({
     }
 
     if (item.adminOnly) {
-      return (
-        role === "super_admin" ||
-        role === "admin"
-      );
+      return role === "super_admin" || role === "admin";
     }
 
     return true;
@@ -144,56 +79,48 @@ function Sidebar({
   return (
     <div className="flex h-full flex-col bg-poem-950 text-white">
       <div className="border-b border-white/10 px-6 py-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-3"
-          onClick={close}
-        >
-          <div className="grid size-11 place-items-center rounded-2xl bg-poem-lime text-lg font-black text-poem-950">
-            P
-          </div>
+        <Link href="/" className="flex items-center gap-3" onClick={close}>
+          <PoemLogo
+            href=""
+            variant="emblem"
+            size="md"
+            imageClassName="rounded-full bg-white object-contain"
+          />
           <div>
-            <p className="text-lg font-black tracking-[-0.04em]">
-              POEM
-            </p>
-            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/45">
-              Admin
+            <p className="text-lg font-black tracking-[-0.04em]">POEM</p>
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-white/55">
+              Administration
             </p>
           </div>
         </Link>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-5">
-        {allowedNavigation.map(
-          ({ label, href, icon: Icon }) => {
-            const active =
-              pathname === href ||
-              (href !== "/admin" &&
-                pathname.startsWith(`${href}/`));
+        {allowedNavigation.map(({ label, href, icon: Icon }) => {
+          const active =
+            pathname === href ||
+            (href !== "/admin" && pathname.startsWith(`${href}/`));
 
-            return (
-              <Link
-                key={label}
-                href={href}
-                onClick={close}
-                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition ${
-                  active
-                    ? "bg-poem-lime text-poem-950"
-                    : "text-white/65 hover:bg-white/5 hover:text-white"
-                }`}
-              >
-                <Icon size={18} />
-                {label}
-              </Link>
-            );
-          },
-        )}
+          return (
+            <Link
+              key={label}
+              href={href}
+              onClick={close}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition ${
+                active
+                  ? "bg-poem-lime text-poem-950"
+                  : "text-white/65 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              <Icon size={18} />
+              {label}
+            </Link>
+          );
+        })}
       </nav>
 
       <div className="border-t border-white/10 p-4">
-        <p className="truncate px-2 text-xs text-white/45">
-          {email}
-        </p>
+        <p className="truncate px-2 text-xs text-white/45">{email}</p>
         <form action={logout}>
           <button
             type="submit"
@@ -242,11 +169,7 @@ export function AdminShell({
             >
               <X size={18} />
             </button>
-            <Sidebar
-              email={email}
-              role={role}
-              close={() => setOpen(false)}
-            />
+            <Sidebar email={email} role={role} close={() => setOpen(false)} />
           </aside>
         </div>
       ) : null}
@@ -272,9 +195,7 @@ export function AdminShell({
           </span>
         </header>
 
-        <main className="p-4 md:p-7 lg:p-9">
-          {children}
-        </main>
+        <main className="p-4 md:p-7 lg:p-9">{children}</main>
       </div>
     </div>
   );
