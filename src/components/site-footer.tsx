@@ -51,6 +51,7 @@ export function SiteFooter() {
               <Link href="/programs" className="hover:text-white">Programs</Link>
               <Link href="/projects" className="hover:text-white">Projects</Link>
               <Link href="/impact" className="hover:text-white">Impact</Link>
+              <Link href="/stories" className="hover:text-white">Stories</Link>
             </div>
           </div>
 

@@ -48,9 +48,7 @@ export async function signIn(formData: FormData) {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) {
-    errorRedirect("/admin/login", error.message);
-  }
+  if (error) errorRedirect("/admin/login", error.message);
 
   redirect("/admin");
 }
@@ -60,7 +58,6 @@ export async function logout() {
     const supabase = await createClient();
     await supabase.auth.signOut();
   }
-
   redirect("/admin/login");
 }
 
@@ -87,9 +84,7 @@ export async function saveProgram(formData: FormData) {
     ? await supabase.from("programs").update(payload).eq("id", id)
     : await supabase.from("programs").insert(payload);
 
-  if (result.error) {
-    errorRedirect("/admin/programs", result.error.message);
-  }
+  if (result.error) errorRedirect("/admin/programs", result.error.message);
 
   revalidatePath("/programs");
   revalidatePath("/admin/programs");
@@ -102,9 +97,11 @@ export async function saveProject(formData: FormData) {
 
   const payload = {
     program_id: optionalText(formData, "program_id"),
+    featured_story_id: optionalText(formData, "featured_story_id"),
     slug: text(formData, "slug").toLowerCase(),
     title: text(formData, "title"),
     category: text(formData, "category"),
+    donor_partner: text(formData, "donor_partner"),
     summary: text(formData, "summary"),
     challenge: text(formData, "challenge"),
     response: text(formData, "response"),
@@ -141,7 +138,6 @@ export async function saveProject(formData: FormData) {
     if (error || !data) {
       errorRedirect("/admin/projects/new", error?.message ?? "Could not create project.");
     }
-
     projectId = data.id;
   }
 
@@ -161,12 +157,8 @@ export async function saveProject(formData: FormData) {
 
   if (sdgs.length) {
     const { error: insertSdgError } = await supabase.from("project_sdgs").insert(
-      sdgs.map((sdgCode) => ({
-        project_id: projectId,
-        sdg_code: sdgCode,
-      })),
+      sdgs.map((sdgCode) => ({ project_id: projectId, sdg_code: sdgCode })),
     );
-
     if (insertSdgError) {
       errorRedirect(`/admin/projects/${projectId}`, insertSdgError.message);
     }

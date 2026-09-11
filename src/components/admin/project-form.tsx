@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { saveProject } from "@/app/admin/actions";
 
-type ProgramOption = {
-  id: string;
-  title: string;
-};
+type ProgramOption = { id: string; title: string };
+type StoryOption = { id: string; title: string };
 
 type ProjectRecord = {
   id: string;
   program_id: string | null;
+  featured_story_id: string | null;
   slug: string;
   title: string;
   category: string;
+  donor_partner: string;
   summary: string;
   challenge: string;
   response: string;
@@ -33,9 +33,11 @@ const labelClass = "text-sm font-bold text-poem-900";
 
 export function ProjectForm({
   programs,
+  stories,
   project,
 }: {
   programs: ProgramOption[];
+  stories: StoryOption[];
   project?: ProjectRecord;
 }) {
   return (
@@ -48,13 +50,7 @@ export function ProjectForm({
         <div className="mt-5 grid gap-5 md:grid-cols-2">
           <label className={labelClass}>
             Project title *
-            <input
-              name="title"
-              required
-              defaultValue={project?.title}
-              className={inputClass}
-              placeholder="Youth Skills & Economic Empowerment"
-            />
+            <input name="title" required defaultValue={project?.title} className={inputClass} />
           </label>
 
           <label className={labelClass}>
@@ -65,7 +61,6 @@ export function ProjectForm({
               defaultValue={project?.slug}
               className={inputClass}
               pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-              placeholder="youth-skills-economic-empowerment"
             />
           </label>
 
@@ -87,23 +82,39 @@ export function ProjectForm({
 
           <label className={labelClass}>
             Category
+            <input name="category" defaultValue={project?.category} className={inputClass} />
+          </label>
+
+          <label className={labelClass}>
+            Donor / partner
             <input
-              name="category"
-              defaultValue={project?.category}
+              name="donor_partner"
+              defaultValue={project?.donor_partner}
               className={inputClass}
-              placeholder="Livelihoods"
+              placeholder="Partner or donor name"
             />
+          </label>
+
+          <label className={labelClass}>
+            Featured story
+            <select
+              name="featured_story_id"
+              defaultValue={project?.featured_story_id ?? ""}
+              className={inputClass}
+            >
+              <option value="">No featured story</option>
+              {stories.map((story) => (
+                <option key={story.id} value={story.id}>
+                  {story.title}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
 
         <label className={`${labelClass} mt-5 block`}>
           Summary
-          <textarea
-            name="summary"
-            rows={4}
-            defaultValue={project?.summary}
-            className={inputClass}
-          />
+          <textarea name="summary" rows={4} defaultValue={project?.summary} className={inputClass} />
         </label>
       </section>
 
@@ -112,22 +123,12 @@ export function ProjectForm({
 
         <label className={`${labelClass} mt-5 block`}>
           Challenge
-          <textarea
-            name="challenge"
-            rows={5}
-            defaultValue={project?.challenge}
-            className={inputClass}
-          />
+          <textarea name="challenge" rows={5} defaultValue={project?.challenge} className={inputClass} />
         </label>
 
         <label className={`${labelClass} mt-5 block`}>
           POEM response
-          <textarea
-            name="response"
-            rows={5}
-            defaultValue={project?.response}
-            className={inputClass}
-          />
+          <textarea name="response" rows={5} defaultValue={project?.response} className={inputClass} />
         </label>
 
         <label className={`${labelClass} mt-5 block`}>
@@ -144,57 +145,34 @@ export function ProjectForm({
           SDGs — comma separated
           <input
             name="sdgs"
-            defaultValue={project?.project_sdgs
-              ?.map((item) => item.sdg_code)
-              .join(", ")}
+            defaultValue={project?.project_sdgs?.map((item) => item.sdg_code).join(", ")}
             className={inputClass}
-            placeholder="SDG 4, SDG 5, SDG 8"
           />
         </label>
       </section>
 
       <section className="rounded-[24px] border border-black/[0.06] bg-white p-6 md:p-7">
-        <h2 className="text-lg font-extrabold text-poem-950">
-          Location & timeline
-        </h2>
+        <h2 className="text-lg font-extrabold text-poem-950">Location & timeline</h2>
 
         <div className="mt-5 grid gap-5 md:grid-cols-2">
           <label className={labelClass}>
             Location
-            <input
-              name="location"
-              defaultValue={project?.location}
-              className={inputClass}
-              placeholder="Mirpurkhas, Sindh"
-            />
+            <input name="location" defaultValue={project?.location} className={inputClass} />
           </label>
 
           <label className={labelClass}>
             District
-            <input
-              name="district"
-              defaultValue={project?.district}
-              className={inputClass}
-              placeholder="Mirpurkhas"
-            />
+            <input name="district" defaultValue={project?.district} className={inputClass} />
           </label>
 
           <label className={labelClass}>
             Province
-            <input
-              name="province"
-              defaultValue={project?.province ?? "Sindh"}
-              className={inputClass}
-            />
+            <input name="province" defaultValue={project?.province ?? "Sindh"} className={inputClass} />
           </label>
 
           <label className={labelClass}>
             Status
-            <select
-              name="status"
-              defaultValue={project?.status ?? "draft"}
-              className={inputClass}
-            >
+            <select name="status" defaultValue={project?.status ?? "draft"} className={inputClass}>
               <option value="draft">Draft</option>
               <option value="active">Active</option>
               <option value="completed">Completed</option>

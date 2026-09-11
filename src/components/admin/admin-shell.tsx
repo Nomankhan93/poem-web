@@ -4,9 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  BookOpenText,
   BriefcaseBusiness,
+  FileText,
   FolderKanban,
   Home,
+  Images,
   LogOut,
   Menu,
   MessageSquare,
@@ -20,18 +23,15 @@ const navigation = [
   { label: "Dashboard", href: "/admin", icon: Home },
   { label: "Projects", href: "/admin/projects", icon: FolderKanban },
   { label: "Programs", href: "/admin/programs", icon: BriefcaseBusiness },
+  { label: "Resources", href: "/admin/resources", icon: FileText },
+  { label: "Stories", href: "/admin/stories", icon: BookOpenText },
+  { label: "Media", href: "/admin/media", icon: Images },
   { label: "Impact", href: "/admin/impact", icon: BarChart3, disabled: true },
   { label: "Messages", href: "/admin/messages", icon: MessageSquare },
   { label: "Settings", href: "/admin/settings", icon: Settings, disabled: true },
 ];
 
-function Sidebar({
-  email,
-  close,
-}: {
-  email: string;
-  close?: () => void;
-}) {
+function Sidebar({ email, close }: { email: string; close?: () => void }) {
   const pathname = usePathname();
 
   return (
@@ -50,7 +50,7 @@ function Sidebar({
         </Link>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-5">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-5">
         {navigation.map(({ label, href, icon: Icon, disabled }) => {
           const active =
             pathname === href ||
@@ -155,11 +155,9 @@ export function AdminShell({
             >
               <Menu size={18} />
             </button>
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-poem-muted">
-                POEM Administration
-              </p>
-            </div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-poem-muted">
+              POEM Administration
+            </p>
           </div>
 
           <span className="rounded-full bg-poem-soft px-3 py-2 text-[10px] font-extrabold uppercase tracking-[0.15em] text-poem-800">

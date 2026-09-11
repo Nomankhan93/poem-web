@@ -10,23 +10,23 @@ export default async function NewProjectPage({
   const params = await searchParams;
   const { supabase } = await requireAdmin();
 
-  const { data: programs } = await supabase
-    .from("programs")
-    .select("id,title")
-    .order("display_order");
+  const [{ data: programs }, { data: stories }] = await Promise.all([
+    supabase.from("programs").select("id,title").order("display_order"),
+    supabase.from("stories").select("id,title").eq("published", true).order("title"),
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl">
       <AdminPageHeader
         eyebrow="Projects"
         title="Create project"
-        description="Create the project record first; images, reports and advanced metrics arrive in the next content/media phase."
+        description="Create the project record first. After saving, add the cover image and gallery from the project editor."
       />
 
       {params.error ? <Notice tone="error">{params.error}</Notice> : null}
 
       <div className="mt-7">
-        <ProjectForm programs={programs ?? []} />
+        <ProjectForm programs={programs ?? []} stories={stories ?? []} />
       </div>
     </div>
   );
