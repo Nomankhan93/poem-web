@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "security:check": "bash scripts/security-check.sh",
+    "release:check": "bash scripts/production-check.sh"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

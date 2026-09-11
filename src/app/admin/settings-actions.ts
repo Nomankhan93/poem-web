@@ -8,11 +8,41 @@ function value(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
 
-export async function saveSiteSettings(formData: FormData) {
+function fail(message: string): never {
+  redirect(
+    `/admin/settings?error=${encodeURIComponent(message)}`,
+  );
+}
+
+function isInternalPath(value: string) {
+  return (
+    value.startsWith("/") &&
+    !value.startsWith("//") &&
+    !value.includes("\\")
+  );
+}
+
+function isSafeHttpsUrl(value: string) {
+  if (!value) return true;
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export async function saveSiteSettings(
+  formData: FormData,
+) {
   const { supabase } = await requireSiteAdmin();
 
   const payload = {
-    organization_name: value(formData, "organization_name"),
+    organization_name: value(
+      formData,
+      "organization_name",
+    ),
     short_name: value(formData, "short_name"),
     tagline: value(formData, "tagline"),
     address: value(formData, "address"),
@@ -27,8 +57,14 @@ export async function saveSiteSettings(formData: FormData) {
       formData,
       "donation_instructions",
     ),
-    homepage_eyebrow: value(formData, "homepage_eyebrow"),
-    homepage_title: value(formData, "homepage_title"),
+    homepage_eyebrow: value(
+      formData,
+      "homepage_eyebrow",
+    ),
+    homepage_title: value(
+      formData,
+      "homepage_title",
+    ),
     homepage_description: value(
       formData,
       "homepage_description",
@@ -50,12 +86,53 @@ export async function saveSiteSettings(formData: FormData) {
       "homepage_secondary_href",
     ),
     seo_title: value(formData, "seo_title"),
-    seo_description: value(formData, "seo_description"),
+    seo_description: value(
+      formData,
+      "seo_description",
+    ),
   };
 
-  if (!payload.organization_name || !payload.short_name) {
-    redirect(
-      "/admin/settings?error=Organization%20name%20and%20short%20name%20are%20required.",
+  if (
+    !payload.organization_name ||
+    !payload.short_name
+  ) {
+    fail(
+      "Organization name and short name are required.",
+    );
+  }
+
+  if (
+    payload.organization_name.length > 180 ||
+    payload.short_name.length > 30 ||
+    payload.tagline.length > 240 ||
+    payload.phone.length > 60 ||
+    payload.email.length > 254
+  ) {
+    fail("One or more settings exceed allowed length.");
+  }
+
+  if (
+    payload.email &&
+    !payload.email.includes("@")
+  ) {
+    fail("Enter a valid organization email.");
+  }
+
+  if (
+    !isSafeHttpsUrl(payload.facebook_url) ||
+    !isSafeHttpsUrl(payload.linkedin_url)
+  ) {
+    fail(
+      "Social links must use secure https:// URLs.",
+    );
+  }
+
+  if (
+    !isInternalPath(payload.homepage_primary_href) ||
+    !isInternalPath(payload.homepage_secondary_href)
+  ) {
+    fail(
+      "Homepage CTA links must be internal paths beginning with /.",
     );
   }
 
@@ -65,9 +142,11 @@ export async function saveSiteSettings(formData: FormData) {
     .eq("id", 1);
 
   if (error) {
-    redirect(
-      `/admin/settings?error=${encodeURIComponent(error.message)}`,
+    console.error(
+      "Site settings update failed:",
+      error.message,
     );
+    fail("Site settings could not be saved.");
   }
 
   revalidatePath("/");

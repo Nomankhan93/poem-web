@@ -1,9 +1,18 @@
 import type { Metadata } from "next";
-import { Mail, MapPin, Phone } from "lucide-react";
+import {
+  Mail,
+  MapPin,
+  Phone,
+} from "lucide-react";
 import { submitContactMessage } from "@/app/contact/actions";
-import { PageHero, SectionHeading } from "@/components/inner-page";
+import {
+  PageHero,
+  SectionHeading,
+} from "@/components/inner-page";
+import { ContactFormTimestamp } from "@/components/contact-form-timestamp";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -16,9 +25,50 @@ export const dynamic = "force-dynamic";
 export default async function ContactPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sent?: string; error?: string }>;
+  searchParams: Promise<{
+    sent?: string;
+    error?: string;
+  }>;
 }) {
   const params = await searchParams;
+  const settings = await getSiteSettings();
+
+  const location = [
+    settings.address,
+    settings.city,
+    settings.province,
+    settings.country,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  const details = [
+    location
+      ? {
+          icon: MapPin,
+          label: "Office",
+          value: location,
+        }
+      : null,
+    settings.email
+      ? {
+          icon: Mail,
+          label: "Email",
+          value: settings.email,
+        }
+      : null,
+    settings.phone
+      ? {
+          icon: Phone,
+          label: "Phone",
+          value: settings.phone,
+        }
+      : null,
+  ].filter(Boolean) as {
+    icon: typeof MapPin;
+    label: string;
+    value: string;
+  }[];
 
   return (
     <>
@@ -35,49 +85,45 @@ export default async function ContactPage({
             <div>
               <SectionHeading
                 eyebrow="Get in touch"
-                title="We'd like to hear from you."
+                title="We would like to hear from you."
               />
 
               <div className="mt-10 space-y-4">
-                {[
-                  {
-                    icon: MapPin,
-                    label: "Office",
-                    value: "Mirpurkhas, Sindh, Pakistan",
-                  },
-                  {
-                    icon: Mail,
-                    label: "Email",
-                    value: "info@thepoempk.com",
-                  },
-                  {
-                    icon: Phone,
-                    label: "Phone",
-                    value: "Add verified POEM contact number",
-                  },
-                ].map(({ icon: Icon, label, value }) => (
-                  <div
-                    key={label}
-                    className="flex gap-4 rounded-2xl bg-poem-soft p-5"
-                  >
-                    <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-poem-900">
-                      <Icon size={19} />
+                {details.map(
+                  ({ icon: Icon, label, value }) => (
+                    <div
+                      key={label}
+                      className="flex gap-4 rounded-2xl bg-poem-soft p-5"
+                    >
+                      <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-poem-900">
+                        <Icon size={19} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-poem-700">
+                          {label}
+                        </p>
+                        <p className="mt-1 font-bold text-poem-950">
+                          {value}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-poem-700">
-                        {label}
-                      </p>
-                      <p className="mt-1 font-bold text-poem-950">{value}</p>
-                    </div>
-                  </div>
-                ))}
+                  ),
+                )}
+
+                {!details.length ? (
+                  <p className="rounded-2xl bg-poem-soft p-5 text-sm text-poem-muted">
+                    Verified contact details will appear here
+                    once added by POEM administration.
+                  </p>
+                ) : null}
               </div>
             </div>
 
             <div>
               {params.sent ? (
                 <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-bold text-green-800">
-                  Thank you. Your message has been submitted to POEM.
+                  Thank you. Your message has been submitted
+                  to POEM.
                 </div>
               ) : null}
 
@@ -89,8 +135,23 @@ export default async function ContactPage({
 
               <form
                 action={submitContactMessage}
-                className="rounded-[32px] bg-poem-soft p-6 md:p-9"
+                className="relative rounded-[32px] bg-poem-soft p-6 md:p-9"
               >
+                <ContactFormTimestamp />
+
+                <label
+                  className="absolute -left-[9999px] top-0"
+                  aria-hidden="true"
+                >
+                  Website
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </label>
+
                 <div className="grid gap-5 sm:grid-cols-2">
                   <label className="text-sm font-bold text-poem-900">
                     Full name
@@ -100,6 +161,7 @@ export default async function ContactPage({
                       required
                       minLength={2}
                       maxLength={120}
+                      autoComplete="name"
                       placeholder="Your name"
                       className="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3.5 font-normal outline-none transition focus:border-poem-700"
                     />
@@ -112,6 +174,7 @@ export default async function ContactPage({
                       name="email"
                       required
                       maxLength={254}
+                      autoComplete="email"
                       placeholder="you@example.com"
                       className="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3.5 font-normal outline-none transition focus:border-poem-700"
                     />
@@ -119,11 +182,15 @@ export default async function ContactPage({
                 </div>
 
                 <label className="mt-5 block text-sm font-bold text-poem-900">
-                  Phone <span className="font-normal text-poem-muted">(optional)</span>
+                  Phone{" "}
+                  <span className="font-normal text-poem-muted">
+                    (optional)
+                  </span>
                   <input
                     type="tel"
                     name="phone"
                     maxLength={40}
+                    autoComplete="tel"
                     placeholder="+92 ..."
                     className="mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3.5 font-normal outline-none transition focus:border-poem-700"
                   />

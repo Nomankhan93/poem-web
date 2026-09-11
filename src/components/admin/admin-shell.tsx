@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Activity,
   BarChart3,
   BookOpenText,
   BriefcaseBusiness,
@@ -34,18 +35,72 @@ type NavItem = {
 
 const navigation: NavItem[] = [
   { label: "Dashboard", href: "/admin", icon: Home },
-  { label: "Projects", href: "/admin/projects", icon: FolderKanban },
-  { label: "Programs", href: "/admin/programs", icon: BriefcaseBusiness },
-  { label: "Impact", href: "/admin/impact", icon: BarChart3 },
-  { label: "Resources", href: "/admin/resources", icon: FileText },
-  { label: "Stories", href: "/admin/stories", icon: BookOpenText },
-  { label: "News", href: "/admin/news", icon: Newspaper },
-  { label: "Partners", href: "/admin/partners", icon: Building2 },
-  { label: "Team", href: "/admin/team", icon: UsersRound },
-  { label: "Careers", href: "/admin/careers", icon: BriefcaseBusiness },
-  { label: "Tenders", href: "/admin/tenders", icon: ClipboardList },
-  { label: "Media", href: "/admin/media", icon: Images },
-  { label: "Messages", href: "/admin/messages", icon: MessageSquare },
+  {
+    label: "Projects",
+    href: "/admin/projects",
+    icon: FolderKanban,
+  },
+  {
+    label: "Programs",
+    href: "/admin/programs",
+    icon: BriefcaseBusiness,
+  },
+  {
+    label: "Impact",
+    href: "/admin/impact",
+    icon: BarChart3,
+  },
+  {
+    label: "Resources",
+    href: "/admin/resources",
+    icon: FileText,
+  },
+  {
+    label: "Stories",
+    href: "/admin/stories",
+    icon: BookOpenText,
+  },
+  {
+    label: "News",
+    href: "/admin/news",
+    icon: Newspaper,
+  },
+  {
+    label: "Partners",
+    href: "/admin/partners",
+    icon: Building2,
+  },
+  {
+    label: "Team",
+    href: "/admin/team",
+    icon: UsersRound,
+  },
+  {
+    label: "Careers",
+    href: "/admin/careers",
+    icon: BriefcaseBusiness,
+  },
+  {
+    label: "Tenders",
+    href: "/admin/tenders",
+    icon: ClipboardList,
+  },
+  {
+    label: "Media",
+    href: "/admin/media",
+    icon: Images,
+  },
+  {
+    label: "Messages",
+    href: "/admin/messages",
+    icon: MessageSquare,
+  },
+  {
+    label: "Audit Log",
+    href: "/admin/audit",
+    icon: Activity,
+    adminOnly: true,
+  },
   {
     label: "Users & Access",
     href: "/admin/users",
@@ -72,9 +127,17 @@ function Sidebar({
   const pathname = usePathname();
 
   const allowedNavigation = navigation.filter((item) => {
-    if (item.superAdminOnly) return role === "super_admin";
-    if (item.adminOnly)
-      return role === "super_admin" || role === "admin";
+    if (item.superAdminOnly) {
+      return role === "super_admin";
+    }
+
+    if (item.adminOnly) {
+      return (
+        role === "super_admin" ||
+        role === "admin"
+      );
+    }
+
     return true;
   });
 
@@ -101,28 +164,30 @@ function Sidebar({
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-5">
-        {allowedNavigation.map(({ label, href, icon: Icon }) => {
-          const active =
-            pathname === href ||
-            (href !== "/admin" &&
-              pathname.startsWith(`${href}/`));
+        {allowedNavigation.map(
+          ({ label, href, icon: Icon }) => {
+            const active =
+              pathname === href ||
+              (href !== "/admin" &&
+                pathname.startsWith(`${href}/`));
 
-          return (
-            <Link
-              key={label}
-              href={href}
-              onClick={close}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition ${
-                active
-                  ? "bg-poem-lime text-poem-950"
-                  : "text-white/65 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <Icon size={18} />
-              {label}
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={label}
+                href={href}
+                onClick={close}
+                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition ${
+                  active
+                    ? "bg-poem-lime text-poem-950"
+                    : "text-white/65 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <Icon size={18} />
+                {label}
+              </Link>
+            );
+          },
+        )}
       </nav>
 
       <div className="border-t border-white/10 p-4">
