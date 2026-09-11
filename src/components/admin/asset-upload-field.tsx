@@ -5,6 +5,8 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizeFileName } from "@/lib/media";
 
+type AssetBucket = "project-media" | "documents" | "team" | "partners";
+
 type ExistingAsset = {
   id: string;
   file_name: string;
@@ -19,7 +21,7 @@ export function AssetUploadField({
   existingAsset,
 }: {
   name: string;
-  bucket: "project-media" | "documents";
+  bucket: AssetBucket;
   label: string;
   accept: string;
   prefix: string;
@@ -36,13 +38,17 @@ export function AssetUploadField({
 
     try {
       const maxBytes =
-        bucket === "documents" ? 25 * 1024 * 1024 : 10 * 1024 * 1024;
+        bucket === "documents" ? 25 * 1024 * 1024 :
+        bucket === "team" || bucket === "partners" ? 5 * 1024 * 1024 :
+        10 * 1024 * 1024;
 
       if (file.size > maxBytes) {
         throw new Error(
           bucket === "documents"
             ? "PDF must be 25 MB or smaller."
-            : "Image must be 10 MB or smaller.",
+            : bucket === "team" || bucket === "partners"
+              ? "Image must be 5 MB or smaller."
+              : "Image must be 10 MB or smaller.",
         );
       }
 

@@ -1,54 +1,53 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, BriefcaseBusiness } from "lucide-react";
+import { ArrowUpRight, BriefcaseBusiness, Clock3, MapPin } from "lucide-react";
 import { PageHero, SectionHeading } from "@/components/inner-page";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getCareers } from "@/lib/organization-content";
 
 export const metadata: Metadata = {
   title: "Careers",
-  description: "Career and employment opportunities at POEM Pakistan.",
+  description: "Current career opportunities at POEM Pakistan.",
 };
 
-export default function CareersPage() {
+export const dynamic = "force-dynamic";
+
+export default async function CareersPage() {
+  const careers = await getCareers();
+
   return (
     <>
       <SiteHeader />
       <main>
-        <PageHero
-          eyebrow="Careers"
-          title="Work with purpose."
-          description="POEM's careers page is ready for vacancies, consultant opportunities and future recruitment workflows."
-        />
+        <PageHero eyebrow="Careers" title="Work with purpose." description="Explore current employment and professional opportunities with POEM." />
 
         <section className="section-space bg-white">
           <div className="container-poem">
-            <SectionHeading
-              eyebrow="Current opportunities"
-              title="Join a team working alongside communities."
-              description="No verified vacancies have been added yet. The admin phase will let POEM publish openings with deadlines, locations, requirements and application instructions."
-            />
+            <SectionHeading eyebrow="Open positions" title="Join a team working alongside communities." />
 
-            <div className="mt-12 rounded-[32px] border border-dashed border-poem-900/20 bg-poem-soft p-8 md:p-12">
-              <div className="grid size-14 place-items-center rounded-2xl bg-white text-poem-900">
-                <BriefcaseBusiness size={24} />
-              </div>
-              <h2 className="mt-8 text-3xl font-extrabold tracking-[-0.04em] text-poem-950">
-                No open vacancies right now.
-              </h2>
-              <p className="mt-4 max-w-2xl leading-7 text-poem-muted">
-                Future vacancies will appear here automatically once published
-                through the POEM admin dashboard.
-              </p>
-
-              <Link
-                href="/contact"
-                className="mt-8 inline-flex items-center gap-2 text-sm font-extrabold text-poem-800"
-              >
-                Contact POEM
-                <ArrowUpRight size={16} />
-              </Link>
+            <div className="mt-12 space-y-4">
+              {careers.map((career) => (
+                <article key={career.id} className="grid gap-5 rounded-[24px] border border-black/[0.07] p-6 md:grid-cols-[1fr_auto] md:items-center">
+                  <div>
+                    <div className="flex flex-wrap gap-3 text-xs font-bold text-poem-muted">
+                      <span className="inline-flex items-center gap-1.5"><BriefcaseBusiness size={14} />{career.department || career.employment_type}</span>
+                      {career.location ? <span className="inline-flex items-center gap-1.5"><MapPin size={14} />{career.location}</span> : null}
+                      {career.deadline ? <span className="inline-flex items-center gap-1.5"><Clock3 size={14} />Deadline {new Date(career.deadline).toLocaleDateString()}</span> : null}
+                    </div>
+                    <h2 className="mt-3 text-2xl font-extrabold tracking-[-0.035em] text-poem-950">{career.title}</h2>
+                    <p className="mt-3 max-w-3xl text-sm leading-7 text-poem-muted">{career.summary}</p>
+                  </div>
+                  <Link href={`/careers/${career.slug}`} className="inline-flex items-center gap-2 rounded-full bg-poem-950 px-5 py-3 text-sm font-extrabold text-white">
+                    View role <ArrowUpRight size={15} />
+                  </Link>
+                </article>
+              ))}
             </div>
+
+            {!careers.length ? (
+              <div className="mt-12 rounded-[28px] bg-poem-soft p-10 text-center text-poem-muted">There are no open vacancies at the moment.</div>
+            ) : null}
           </div>
         </section>
       </main>
