@@ -25,7 +25,7 @@ export default function ImpactPage() {
         <PageHero
           eyebrow="Our impact"
           title="Evidence should make progress visible."
-          description="POEM's new website is being structured to present verified reach, outcomes and learning in a way that is useful to communities, partners and donors."
+          description="POEM&apos;s new website is being structured to present verified reach, outcomes and learning in a way that is useful to communities, partners and donors."
         />
 
         <section className="border-b border-black/5 bg-poem-cream">
@@ -98,7 +98,7 @@ export default function ImpactPage() {
               </p>
               <p className="mt-3 max-w-4xl leading-7 text-poem-muted">
                 The figures currently shown are design placeholders from Phase
-                1. They must be replaced with POEM's verified figures before the
+                1. They must be replaced with POEM&apos;s verified figures before the
                 public site is launched. The next data phase should store each
                 metric with a reporting period and source.
               </p>

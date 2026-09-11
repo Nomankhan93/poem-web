@@ -88,7 +88,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
 
               <div className="mt-12 border-t border-black/10 pt-10">
                 <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-poem-700">
-                  POEM's response
+                  POEM&apos;s response
                 </p>
                 <h2 className="mt-4 text-4xl font-extrabold tracking-[-0.05em] text-poem-950">
                   Designed around participation.
@@ -105,7 +105,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
               </p>
 
               <div className="mt-6 space-y-4">
-                {project.outcomes.map((outcome) => (
+                {project.outcomes.map((outcome: string) => (
                   <div key={outcome} className="flex gap-3">
                     <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full bg-poem-lime text-poem-950">
                       <Check size={14} strokeWidth={3} />
