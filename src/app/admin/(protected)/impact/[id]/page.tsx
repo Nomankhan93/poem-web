@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
+import { deleteImpactMetric } from "@/app/admin/impact-actions";
 import {
   AdminPageHeader,
   Notice,
 } from "@/components/admin/admin-ui";
 import { ImpactForm } from "@/components/admin/impact-form";
-import { deleteImpactMetric } from "@/app/admin/impact-actions";
 import { requireAdmin } from "@/lib/admin/auth";
 
 export default async function EditImpactPage({
@@ -18,21 +18,20 @@ export default async function EditImpactPage({
   const query = await searchParams;
   const { supabase } = await requireAdmin();
 
-  const [{ data: metric }, { data: projects }] =
-    await Promise.all([
-      supabase
-        .from("project_metrics")
-        .select(
-          "id,project_id,year,district,people_reached,women_reached,men_reached,children_reached,youth_trained,communities_reached,trainings_conducted,livelihoods_supported,published",
-        )
-        .eq("id", id)
-        .maybeSingle(),
-      supabase
-        .from("projects")
-        .select("id,title,district")
-        .neq("status", "archived")
-        .order("title"),
-    ]);
+  const [{ data: metric }, { data: projects }] = await Promise.all([
+    supabase
+      .from("project_metrics")
+      .select(
+        "id,project_id,year,period_start,period_end,district,people_reached,women_reached,men_reached,children_reached,youth_trained,communities_reached,trainings_conducted,livelihoods_supported,published",
+      )
+      .eq("id", id)
+      .maybeSingle(),
+    supabase
+      .from("projects")
+      .select("id,title,district")
+      .neq("status", "archived")
+      .order("title"),
+  ]);
 
   if (!metric) notFound();
 
@@ -41,7 +40,7 @@ export default async function EditImpactPage({
       <AdminPageHeader
         eyebrow="Impact"
         title="Edit impact metrics"
-        description={`${metric.year}${metric.district ? ` · ${metric.district}` : ""}`}
+        description={`${metric.period_start} → ${metric.period_end}${metric.district ? ` · ${metric.district}` : ""}`}
       />
 
       {query.saved ? (
@@ -52,10 +51,7 @@ export default async function EditImpactPage({
       ) : null}
 
       <div className="mt-7">
-        <ImpactForm
-          projects={projects ?? []}
-          metric={metric}
-        />
+        <ImpactForm projects={projects ?? []} metric={metric} />
       </div>
 
       <form action={deleteImpactMetric} className="mt-6 text-right">

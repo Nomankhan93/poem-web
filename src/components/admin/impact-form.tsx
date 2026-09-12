@@ -11,6 +11,8 @@ type Metric = {
   id: string;
   project_id: string;
   year: number;
+  period_start: string;
+  period_end: string;
   district: string;
   people_reached: number;
   women_reached: number;
@@ -27,6 +29,14 @@ const input =
   "mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-poem-700";
 const label = "text-sm font-bold text-poem-900";
 
+function annualPeriod() {
+  const year = new Date().getFullYear();
+  return {
+    start: `${year}-01-01`,
+    end: `${year}-12-31`,
+  };
+}
+
 export function ImpactForm({
   projects,
   metric,
@@ -34,6 +44,7 @@ export function ImpactForm({
   projects: ProjectOption[];
   metric?: Metric;
 }) {
+  const fallback = annualPeriod();
   const fields = [
     ["people_reached", "People reached"],
     ["women_reached", "Women reached"],
@@ -55,8 +66,13 @@ export function ImpactForm({
         <h2 className="text-lg font-extrabold text-poem-950">
           Metric context
         </h2>
+        <p className="mt-2 text-sm leading-6 text-poem-muted">
+          Use the exact reporting period. Quarterly and custom donor
+          periods can now be recorded without treating a partial year as
+          a full annual result.
+        </p>
 
-        <div className="mt-5 grid gap-5 md:grid-cols-3">
+        <div className="mt-5 grid gap-5 md:grid-cols-2">
           <label className={`${label} md:col-span-2`}>
             Project *
             <select
@@ -75,21 +91,28 @@ export function ImpactForm({
           </label>
 
           <label className={label}>
-            Year *
+            Period start *
             <input
-              name="year"
-              type="number"
-              min="2000"
-              max="2100"
+              name="period_start"
+              type="date"
               required
-              defaultValue={
-                metric?.year ?? new Date().getFullYear()
-              }
+              defaultValue={metric?.period_start ?? fallback.start}
               className={input}
             />
           </label>
 
-          <label className={`${label} md:col-span-3`}>
+          <label className={label}>
+            Period end *
+            <input
+              name="period_end"
+              type="date"
+              required
+              defaultValue={metric?.period_end ?? fallback.end}
+              className={input}
+            />
+          </label>
+
+          <label className={`${label} md:col-span-2`}>
             District
             <input
               name="district"
@@ -106,8 +129,8 @@ export function ImpactForm({
           Verified results
         </h2>
         <p className="mt-2 text-sm leading-6 text-poem-muted">
-          Enter only verified values. Published metrics appear on the
-          public Impact page and homepage.
+          Enter only verified values for this exact reporting period.
+          Published periods for the same project cannot overlap.
         </p>
 
         <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">

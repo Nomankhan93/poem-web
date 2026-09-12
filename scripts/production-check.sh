@@ -11,15 +11,19 @@ echo "============================="
 bash scripts/security-check.sh
 
 echo
-echo "[1/3] TypeScript"
+echo "[1/4] Phase 4 integrity source checks"
+npm run test:phase4-integrity
+
+echo
+echo "[2/4] TypeScript"
 npx tsc --noEmit
 
 echo
-echo "[2/3] ESLint"
+echo "[3/4] ESLint"
 npm run lint
 
 echo
-echo "[3/3] Production build"
+echo "[4/4] Production build"
 npm run build
 
 echo

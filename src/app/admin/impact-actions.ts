@@ -19,6 +19,10 @@ function checked(formData: FormData, key: string) {
   return formData.get(key) === "on";
 }
 
+function isIsoDate(valueToCheck: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(valueToCheck);
+}
+
 function fail(path: string, message: string): never {
   redirect(`${path}?error=${encodeURIComponent(message)}`);
 }
@@ -28,18 +32,29 @@ export async function saveImpactMetric(formData: FormData) {
 
   const id = value(formData, "id");
   const path = id ? `/admin/impact/${id}` : "/admin/impact";
+  const periodStart = value(formData, "period_start");
+  const periodEnd = value(formData, "period_end");
+
+  if (
+    !isIsoDate(periodStart) ||
+    !isIsoDate(periodEnd) ||
+    periodEnd < periodStart
+  ) {
+    fail(path, "A valid reporting period is required.");
+  }
+
+  const year = Number(periodStart.slice(0, 4));
 
   const payload = {
     project_id: value(formData, "project_id"),
-    year: numberValue(formData, "year"),
+    year,
+    period_start: periodStart,
+    period_end: periodEnd,
     district: value(formData, "district"),
     people_reached: numberValue(formData, "people_reached"),
     women_reached: numberValue(formData, "women_reached"),
     men_reached: numberValue(formData, "men_reached"),
-    children_reached: numberValue(
-      formData,
-      "children_reached",
-    ),
+    children_reached: numberValue(formData, "children_reached"),
     youth_trained: numberValue(formData, "youth_trained"),
     communities_reached: numberValue(
       formData,
@@ -56,8 +71,8 @@ export async function saveImpactMetric(formData: FormData) {
     published: checked(formData, "published"),
   };
 
-  if (!payload.project_id || payload.year < 2000) {
-    fail(path, "Project and valid year are required.");
+  if (!payload.project_id || year < 2000 || year > 2100) {
+    fail(path, "Project and valid reporting period are required.");
   }
 
   const result = id
@@ -80,6 +95,7 @@ export async function saveImpactMetric(formData: FormData) {
   revalidatePath("/impact");
   revalidatePath("/admin");
   revalidatePath("/admin/impact");
+  revalidatePath("/admin/fundraising/grants");
 
   redirect(
     metricId
@@ -102,5 +118,6 @@ export async function deleteImpactMetric(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/impact");
   revalidatePath("/admin/impact");
+  revalidatePath("/admin/fundraising/grants");
   redirect("/admin/impact?deleted=1");
 }

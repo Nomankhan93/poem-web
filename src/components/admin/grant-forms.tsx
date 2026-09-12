@@ -1,14 +1,13 @@
 import Link from "next/link";
 import {
   addFundReceipt,
-  addGrantAgreement,
   addGrantInstallment,
-  addGrantReportDocument,
   addReportingObligation,
   saveGrantAward,
   updateReportingObligation,
 } from "@/app/admin/grant-management-actions";
-import { agreementTypes, grantStatuses, reportDocumentKinds, reportStatuses, reportTypes } from "@/lib/grants";
+import { grantStatuses, reportStatuses, reportTypes } from "@/lib/grants";
+import { GrantAgreementUploader, GrantReportDocumentUploader } from "@/components/admin/grant-private-uploaders";
 
 const input = "mt-2 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-poem-700";
 const label = "text-sm font-bold text-poem-900";
@@ -44,7 +43,7 @@ export function GrantAwardForm({ award, applications, donors, projects, programs
 }
 
 export function AgreementForm({ grantId, currency }: { grantId: string; currency: string }) {
-  return <form action={addGrantAgreement} className="grid gap-4 rounded-[20px] bg-poem-soft p-5 md:grid-cols-2" encType="multipart/form-data"><input type="hidden" name="grant_id" value={grantId}/><label className={label}>Agreement type<select name="agreement_type" className={input}>{agreementTypes.map(([v,t])=><option key={v} value={v}>{t}</option>)}</select></label><label className={label}>Title *<input name="title" required className={input}/></label><label className={label}>Reference number<input name="reference_number" className={input}/></label><label className={label}>Agreement amount<input name="agreement_amount" type="number" min="0" step="0.01" className={input}/><input type="hidden" name="currency" value={currency}/></label><label className={label}>Signed date<input name="signed_date" type="date" className={input}/></label><label className={label}>Effective date<input name="effective_date" type="date" className={input}/></label><label className={label}>Expiry date<input name="expiry_date" type="date" className={input}/></label><label className={label}>Private agreement file<input name="file" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" className={input}/></label><label className={`${label} md:col-span-2`}>Notes<textarea name="notes" rows={3} className={input}/></label><div className="md:col-span-2"><button className="rounded-full bg-poem-950 px-5 py-3 text-xs font-extrabold text-white">Add agreement</button></div></form>;
+  return <GrantAgreementUploader grantId={grantId} currency={currency} />;
 }
 
 export function InstallmentForm({ grantId, nextNumber }: { grantId: string; nextNumber: number }) {
@@ -64,5 +63,5 @@ export function ReportingStatusForm({ grantId, obligationId, status, feedback }:
 }
 
 export function ReportDocumentForm({ grantId, obligationId }: { grantId: string; obligationId: string }) {
-  return <form action={addGrantReportDocument} className="mt-4 grid gap-3 rounded-xl border border-dashed border-black/15 p-4 sm:grid-cols-2" encType="multipart/form-data"><input type="hidden" name="grant_id" value={grantId}/><input type="hidden" name="obligation_id" value={obligationId}/><label className={label}>Document kind<select name="document_kind" className={input}>{reportDocumentKinds.map(([v,t])=><option key={v} value={v}>{t}</option>)}</select></label><label className={label}>Title<input name="title" className={input}/></label><label className={`${label} sm:col-span-2`}>File *<input name="file" type="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" className={input}/></label><div className="sm:col-span-2"><button className="rounded-full bg-poem-950 px-4 py-2 text-xs font-extrabold text-white">Upload report document</button></div></form>;
+  return <GrantReportDocumentUploader grantId={grantId} obligationId={obligationId} />;
 }

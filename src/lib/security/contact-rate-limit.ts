@@ -1,9 +1,27 @@
-import { createHash } from "node:crypto";
+import { createHmac } from "node:crypto";
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import {
+  createSupabaseAdminClient,
+  hasSupabaseAdminSecret,
+} from "@/lib/supabase/admin";
 
-function sha256(value: string) {
-  return createHash("sha256")
+function getFingerprintSecret() {
+  const secret =
+    process.env.CONTACT_RATE_LIMIT_SECRET ||
+    process.env.SUPABASE_SECRET_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!secret) {
+    throw new Error(
+      "Contact anti-abuse secret is not configured.",
+    );
+  }
+
+  return secret;
+}
+
+function hmac(value: string) {
+  return createHmac("sha256", getFingerprintSecret())
     .update(value)
     .digest("hex");
 }
@@ -16,41 +34,46 @@ async function requestFingerprint() {
     ?.split(",")[0]
     ?.trim();
 
-  const realIp = requestHeaders
-    .get("x-real-ip")
-    ?.trim();
-
+  const realIp = requestHeaders.get("x-real-ip")?.trim();
   const ip = forwardedFor || realIp || "unknown";
 
-  return sha256(`poem-contact-ip:${ip}`);
+  return hmac(`poem-contact-ip:${ip}`);
 }
 
-export async function allowContactSubmission(
-  email: string,
-) {
-  const supabase = await createClient();
-  const ipHash = await requestFingerprint();
-  const emailHash = sha256(
-    `poem-contact-email:${email.trim().toLowerCase()}`,
-  );
-
-  const { data, error } = await supabase.rpc(
-    "check_contact_rate_limit",
-    {
-      p_ip_hash: ipHash,
-      p_email_hash: emailHash,
-    },
-  );
-
-  if (error) {
+export async function allowContactSubmission(email: string) {
+  if (!hasSupabaseAdminSecret()) {
     console.error(
-      "Contact rate-limit check failed:",
-      error.message,
+      "Contact rate limiting requires a server-only Supabase secret.",
     );
-
-    // Fail closed if anti-abuse infrastructure is unavailable.
     return false;
   }
 
-  return data === true;
+  try {
+    const supabase = createSupabaseAdminClient();
+    const ipHash = await requestFingerprint();
+    const emailHash = hmac(
+      `poem-contact-email:${email.trim().toLowerCase()}`,
+    );
+
+    const { data, error } = await supabase.rpc(
+      "check_contact_rate_limit",
+      {
+        p_ip_hash: ipHash,
+        p_email_hash: emailHash,
+      },
+    );
+
+    if (error) {
+      console.error(
+        "Contact rate-limit check failed:",
+        error.message,
+      );
+      return false;
+    }
+
+    return data === true;
+  } catch (error) {
+    console.error("Contact rate-limit check failed:", error);
+    return false;
+  }
 }

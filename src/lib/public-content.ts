@@ -1,7 +1,7 @@
 import { Users } from "lucide-react";
-import { programs as staticPrograms, projects as staticProjects } from "@/lib/site-data";
+import { programs as staticPrograms } from "@/lib/site-data";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { MediaAsset } from "@/lib/media";
 
 const accents = [
@@ -12,7 +12,7 @@ const accents = [
 ];
 
 function publicUrl(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: ReturnType<typeof createPublicClient>,
   asset?: Pick<MediaAsset, "bucket" | "path"> | null,
 ) {
   if (!asset) return null;
@@ -20,17 +20,17 @@ function publicUrl(
 }
 
 export async function getPublicPrograms() {
-  if (!isSupabaseConfigured()) return staticPrograms;
+  if (!isSupabaseConfigured()) return [];
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("programs")
       .select("id,slug,title,short_title,summary,description,focus,display_order,published")
       .eq("published", true)
       .order("display_order");
 
-    if (error || !data?.length) return staticPrograms;
+    if (error || !data?.length) return [];
 
     return data.map((row) => {
       const fallback = staticPrograms.find((item) => item.slug === row.slug);
@@ -44,16 +44,17 @@ export async function getPublicPrograms() {
         icon: fallback?.icon ?? Users,
       };
     });
-  } catch {
-    return staticPrograms;
+  } catch (error) {
+    console.error("Public programs query failed:", error);
+    return [];
   }
 }
 
 export async function getPublicProjects() {
-  if (!isSupabaseConfigured()) return staticProjects;
+  if (!isSupabaseConfigured()) return [];
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("projects")
       .select("id,slug,title,category,summary,challenge,response,outcomes,status,location,district,province,featured,published,project_sdgs(sdg_code)")
@@ -61,7 +62,7 @@ export async function getPublicProjects() {
       .order("featured", { ascending: false })
       .order("created_at", { ascending: false });
 
-    if (error || !data?.length) return staticProjects;
+    if (error || !data?.length) return [];
 
     return data.map((row, index) => ({
       slug: row.slug,
@@ -76,22 +77,19 @@ export async function getPublicProjects() {
       sdgs: (row.project_sdgs ?? []).map((item: { sdg_code: string }) => item.sdg_code),
       accent: accents[index % accents.length],
     }));
-  } catch {
-    return staticProjects;
+  } catch (error) {
+    console.error("Public projects query failed:", error);
+    return [];
   }
 }
 
 export async function getPublicProjectBySlug(slug: string) {
-  const staticFallback = staticProjects.find((project) => project.slug === slug) ?? null;
-
   if (!isSupabaseConfigured()) {
-    return staticFallback
-      ? { ...staticFallback, donorPartner: "", coverUrl: null, gallery: [], reports: [], featuredStory: null }
-      : null;
+    return null;
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("projects")
       .select("id,slug,title,category,summary,challenge,response,outcomes,status,location,district,province,featured,published,donor_partner,featured_story_id,project_sdgs(sdg_code)")
@@ -99,11 +97,7 @@ export async function getPublicProjectBySlug(slug: string) {
       .eq("published", true)
       .maybeSingle();
 
-    if (error || !data) {
-      return staticFallback
-        ? { ...staticFallback, donorPartner: "", coverUrl: null, gallery: [], reports: [], featuredStory: null }
-        : null;
-    }
+    if (error || !data) return null;
 
     const mediaResult = await supabase
       .from("project_media")
@@ -191,16 +185,15 @@ export async function getPublicProjectBySlug(slug: string) {
       reports,
       featuredStory,
     };
-  } catch {
-    return staticFallback
-      ? { ...staticFallback, donorPartner: "", coverUrl: null, gallery: [], reports: [], featuredStory: null }
-      : null;
+  } catch (error) {
+    console.error("Public project query failed:", error);
+    return null;
   }
 }
 
 export async function getPublicResources() {
   if (!isSupabaseConfigured()) return [];
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("resources")
     .select("id,slug,title,category,year,description,featured,published,pdf_asset:media_assets!resources_pdf_asset_id_fkey(id,bucket,path,file_name,mime_type,size_bytes,alt_text,caption),cover_asset:media_assets!resources_cover_asset_id_fkey(id,bucket,path,file_name,mime_type,size_bytes,alt_text,caption)")
@@ -233,7 +226,7 @@ export async function getPublicResources() {
 
 export async function getPublicResourceBySlug(slug: string) {
   if (!isSupabaseConfigured()) return null;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("resources")
     .select("id,slug,title,category,year,description,featured,published,project:projects(id,slug,title),pdf_asset:media_assets!resources_pdf_asset_id_fkey(id,bucket,path,file_name,mime_type,size_bytes,alt_text,caption),cover_asset:media_assets!resources_cover_asset_id_fkey(id,bucket,path,file_name,mime_type,size_bytes,alt_text,caption)")
@@ -257,7 +250,7 @@ export async function getPublicResourceBySlug(slug: string) {
 
 export async function getPublicStories() {
   if (!isSupabaseConfigured()) return [];
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("stories")
     .select("id,slug,title,excerpt,person_name,location,featured,published,cover_asset:media_assets!stories_cover_asset_id_fkey(id,bucket,path,file_name,mime_type,size_bytes,alt_text,caption)")
@@ -286,7 +279,7 @@ export async function getPublicStories() {
 
 export async function getPublicStoryBySlug(slug: string) {
   if (!isSupabaseConfigured()) return null;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("stories")
     .select("id,slug,title,excerpt,body,person_name,location,featured,published,project:projects(id,slug,title),cover_asset:media_assets!stories_cover_asset_id_fkey(id,bucket,path,file_name,mime_type,size_bytes,alt_text,caption)")

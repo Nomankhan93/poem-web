@@ -37,7 +37,7 @@ export default async function AdminImpactPage({
       supabase
         .from("project_metrics")
         .select(
-          "id,project_id,year,district,people_reached,women_reached,men_reached,children_reached,youth_trained,communities_reached,trainings_conducted,livelihoods_supported,published,project:projects(title)",
+          "id,project_id,year,period_start,period_end,district,people_reached,women_reached,men_reached,children_reached,youth_trained,communities_reached,trainings_conducted,livelihoods_supported,published,project:projects(title)",
         )
         .order("year", { ascending: false })
         .order("created_at", { ascending: false }),
@@ -88,7 +88,7 @@ export default async function AdminImpactPage({
       <AdminPageHeader
         eyebrow="Impact"
         title="Verified impact metrics"
-        description="Manage project- and year-level results. Only published metrics are visible publicly."
+        description="Manage verified project results by exact reporting period. Only published metrics are visible publicly."
       />
 
       {params.saved ? <Notice>Impact metrics saved.</Notice> : null}
@@ -154,7 +154,7 @@ export default async function AdminImpactPage({
                     ) : null}
                   </div>
                   <p className="mt-1 text-xs text-poem-muted">
-                    {metric.year}
+                    {metric.period_start} → {metric.period_end}
                     {metric.district
                       ? ` · ${metric.district}`
                       : ""}

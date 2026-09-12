@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "security:check": "bash scripts/security-check.sh",
-    "release:check": "bash scripts/production-check.sh"
+    "release:check": "bash scripts/production-check.sh",
+    "test:phase4-integrity": "node scripts/test-phase4-integrity.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
