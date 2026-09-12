@@ -36,6 +36,7 @@ type NavItem = {
 
 const navigation: NavItem[] = [
   { label: "Dashboard", href: "/admin", icon: Home },
+  { label: "Fundraising", href: "/admin/fundraising", icon: BriefcaseBusiness, adminOnly: true },
   { label: "Projects", href: "/admin/projects", icon: FolderKanban },
   { label: "Programs", href: "/admin/programs", icon: BriefcaseBusiness },
   { label: "Impact", href: "/admin/impact", icon: BarChart3 },
