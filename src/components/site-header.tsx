@@ -14,6 +14,7 @@ const navigation = [
   { href: "/resources", label: "Resources" },
   { href: "/stories", label: "Stories" },
   { href: "/news", label: "News" },
+  { href: "/fundraising", label: "Fundraising" },
   { href: "/contact", label: "Contact" },
 ];
 

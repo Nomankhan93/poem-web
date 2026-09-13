@@ -10,8 +10,10 @@ import {
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { PageCta } from "@/components/inner-page";
+import { ProjectFundingSummary } from "@/components/project-funding-summary";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getPublicProjectFundingBySlug } from "@/lib/fundraising-campaigns";
 import { formatBytes } from "@/lib/media";
 import { getPublicProjectBySlug } from "@/lib/public-content";
 
@@ -37,7 +39,10 @@ export async function generateMetadata({
 
 export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const { slug } = await params;
-  const project = await getPublicProjectBySlug(slug);
+  const [project, funding] = await Promise.all([
+    getPublicProjectBySlug(slug),
+    getPublicProjectFundingBySlug(slug),
+  ]);
 
   if (!project) notFound();
 
@@ -99,6 +104,8 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
             </div>
           </div>
         </section>
+
+        {funding ? <ProjectFundingSummary funding={funding} /> : null}
 
         <section className="section-space bg-white">
           <div className="container-poem grid gap-12 lg:grid-cols-[1fr_.7fr]">

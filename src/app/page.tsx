@@ -7,6 +7,7 @@ import {
   Newspaper,
   Quote,
 } from "lucide-react";
+import { FeaturedFundraisingCampaign } from "@/components/featured-fundraising-campaign";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getHomepageContent } from "@/lib/home-content";
@@ -14,15 +15,17 @@ import {
   formatImpactNumber,
   getPublicImpact,
 } from "@/lib/impact";
+import { getFeaturedCampaign } from "@/lib/fundraising-campaigns";
 import { getSiteSettings } from "@/lib/site-settings";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [settings, impact, content] = await Promise.all([
+  const [settings, impact, content, featuredCampaign] = await Promise.all([
     getSiteSettings(),
     getPublicImpact(),
     getHomepageContent(),
+    getFeaturedCampaign(),
   ]);
 
   const impactCards = [
@@ -91,6 +94,10 @@ export default async function HomePage() {
             )}
           </div>
         </section>
+
+        {featuredCampaign ? (
+          <FeaturedFundraisingCampaign campaign={featuredCampaign} />
+        ) : null}
 
         <section className="section-space bg-poem-cream">
           <div className="container-poem">

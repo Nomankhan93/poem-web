@@ -71,13 +71,23 @@ export default function DonatePage() {
                 branch and donor receipt instructions once confirmed by POEM.
               </p>
 
-              <Link
-                href="/contact"
-                className="mt-8 inline-flex items-center gap-2 rounded-full bg-poem-lime px-6 py-3.5 text-sm font-extrabold text-poem-950"
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/fundraising"
+                  className="inline-flex items-center gap-2 rounded-full bg-poem-lime px-6 py-3.5 text-sm font-extrabold text-poem-950"
+                >
+                  Browse fundraising campaigns
+                  <ArrowUpRight size={16} />
+                </Link>
+
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-3.5 text-sm font-extrabold text-white"
               >
                 Donation inquiry
                 <ArrowUpRight size={16} />
               </Link>
+              </div>
             </aside>
           </div>
         </section>
