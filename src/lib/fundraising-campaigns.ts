@@ -136,6 +136,35 @@ export async function getPublicCampaigns() {
   }
 }
 
+export async function getActiveCampaignForBanner() {
+  const campaigns = await getPublicCampaigns();
+  const today = new Date().toISOString().slice(0, 10);
+
+  const activeCampaigns = campaigns
+    .filter((campaign) => {
+      if (campaign.status !== "active") return false;
+      if (campaign.startDate && campaign.startDate > today) return false;
+      if (campaign.endDate && campaign.endDate < today) return false;
+      return true;
+    })
+    .sort((left, right) => {
+      if (left.featured !== right.featured) {
+        return Number(right.featured) - Number(left.featured);
+      }
+
+      if (left.endDate && right.endDate) {
+        return left.endDate.localeCompare(right.endDate);
+      }
+
+      if (left.endDate) return -1;
+      if (right.endDate) return 1;
+
+      return left.title.localeCompare(right.title);
+    });
+
+  return activeCampaigns[0] ?? null;
+}
+
 export async function getFeaturedCampaign() {
   const campaigns = await getPublicCampaigns();
   return (
