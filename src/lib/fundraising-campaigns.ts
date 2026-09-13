@@ -138,15 +138,9 @@ export async function getPublicCampaigns() {
 
 export async function getActiveCampaignForBanner() {
   const campaigns = await getPublicCampaigns();
-  const today = new Date().toISOString().slice(0, 10);
 
   const activeCampaigns = campaigns
-    .filter((campaign) => {
-      if (campaign.status !== "active") return false;
-      if (campaign.startDate && campaign.startDate > today) return false;
-      if (campaign.endDate && campaign.endDate < today) return false;
-      return true;
-    })
+    .filter((campaign) => campaign.status === "active")
     .sort((left, right) => {
       if (left.featured !== right.featured) {
         return Number(right.featured) - Number(left.featured);
